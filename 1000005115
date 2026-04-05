@@ -1,0 +1,1834 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>GitHub Portfolio Generator</title>
+<meta name="description" content="Generate a stunning developer portfolio from your GitHub profile"/>
+<meta name="theme-color" content="#0a0a0f"/>
+<link rel="manifest" href="./manifest.json"/>
+<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='24' fill='%230a0a0f'/><text x='96' y='130' font-size='110' text-anchor='middle'>⬡</text></svg>"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+
+<style>
+:root {
+  --bg: #0a0a0f;
+  --bg2: #111118;
+  --bg3: #1a1a24;
+  --border: #2a2a38;
+  --border2: #3a3a50;
+  --text: #e8e8f0;
+  --text2: #8888aa;
+  --text3: #5555770;
+  --accent: #7c6dfa;
+  --accent2: #a855f7;
+  --green: #22d3a0;
+  --red: #f87171;
+  --yellow: #fbbf24;
+  --font-serif: 'DM Serif Display', Georgia, serif;
+  --font-sans: 'DM Sans', system-ui, sans-serif;
+  --font-mono: 'DM Mono', 'Courier New', monospace;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ─── SCREEN MANAGER ──────────────────────────────── */
+.screen { display: none; min-height: 100vh; }
+.screen.active { display: flex; }
+
+/* ─── LOGIN SCREEN ────────────────────────────────── */
+#screen-login {
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.login-bg {
+  position: absolute; inset: 0; z-index: 0;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 0%, rgba(124,109,250,0.18) 0%, transparent 70%),
+    radial-gradient(ellipse 40% 40% at 80% 80%, rgba(168,85,247,0.10) 0%, transparent 60%);
+}
+
+.login-grid {
+  position: absolute; inset: 0; z-index: 0;
+  background-image:
+    linear-gradient(rgba(124,109,250,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(124,109,250,0.04) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+
+.login-card {
+  position: relative; z-index: 1;
+  width: 100%; max-width: 460px;
+  background: rgba(17,17,24,0.85);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 3rem 2.5rem;
+  backdrop-filter: blur(20px);
+  box-shadow: 0 24px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.04) inset;
+}
+
+.login-badge {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  background: rgba(124,109,250,0.12);
+  border: 1px solid rgba(124,109,250,0.3);
+  border-radius: 99px;
+  padding: 0.3rem 0.9rem;
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--accent);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 1.5rem;
+}
+
+.login-badge span { font-size: 0.85em; }
+
+.login-title {
+  font-family: var(--font-serif);
+  font-size: clamp(2rem, 5vw, 2.8rem);
+  line-height: 1.15;
+  margin-bottom: 0.75rem;
+  letter-spacing: -0.02em;
+}
+
+.login-title em { color: var(--accent); font-style: italic; }
+
+.login-sub {
+  color: var(--text2);
+  font-size: 0.9rem;
+  line-height: 1.6;
+  margin-bottom: 2rem;
+}
+
+.field-group { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1rem; }
+
+.field-label {
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--text2);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  display: flex; align-items: center; gap: 0.4rem;
+}
+
+.field-label .req { color: var(--accent); }
+
+.field-input {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 0.75rem 1rem;
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  width: 100%;
+}
+
+.field-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(124,109,250,0.15);
+}
+
+.field-input::placeholder { color: var(--text2); opacity: 0.6; }
+
+.field-hint {
+  font-size: 0.75rem;
+  color: var(--text2);
+  opacity: 0.7;
+  line-height: 1.4;
+}
+
+.field-hint a { color: var(--accent); text-decoration: none; }
+.field-hint a:hover { text-decoration: underline; }
+
+.divider {
+  display: flex; align-items: center; gap: 1rem;
+  margin: 1.25rem 0;
+  color: var(--text2);
+  font-size: 0.75rem;
+}
+
+.divider::before, .divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+.btn-primary {
+  width: 100%;
+  padding: 0.85rem 1.5rem;
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+  border: none;
+  border-radius: 10px;
+  color: #fff;
+  font-family: var(--font-sans);
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.15s, box-shadow 0.2s;
+  letter-spacing: 0.01em;
+  box-shadow: 0 4px 20px rgba(124,109,250,0.35);
+  margin-top: 0.5rem;
+  display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+}
+
+.btn-primary:hover { opacity: 0.9; transform: translateY(-1px); box-shadow: 0 8px 28px rgba(124,109,250,0.45); }
+.btn-primary:active { transform: translateY(0); }
+.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+.btn-secondary {
+  padding: 0.75rem 1.25rem;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: 0.88rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+  display: inline-flex; align-items: center; gap: 0.4rem;
+}
+
+.btn-secondary:hover { background: var(--bg2); border-color: var(--border2); }
+
+.error-msg {
+  background: rgba(248,113,113,0.1);
+  border: 1px solid rgba(248,113,113,0.3);
+  border-radius: 8px;
+  padding: 0.65rem 1rem;
+  font-size: 0.82rem;
+  color: var(--red);
+  margin-top: 0.75rem;
+  display: none;
+}
+
+.error-msg.show { display: block; }
+
+/* ─── LOADING ──────────────────────────────────────── */
+#screen-loading {
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+}
+
+.loader-ring {
+  width: 56px; height: 56px;
+  border: 3px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.loader-text {
+  color: var(--text2);
+  font-size: 0.9rem;
+  font-family: var(--font-mono);
+}
+
+.loader-steps {
+  display: flex; flex-direction: column; gap: 0.4rem;
+  align-items: center;
+}
+
+.loader-step {
+  font-size: 0.8rem;
+  color: var(--text2);
+  font-family: var(--font-mono);
+  opacity: 0;
+  transition: opacity 0.4s;
+}
+
+.loader-step.done { color: var(--green); opacity: 1; }
+.loader-step.active { color: var(--text); opacity: 1; }
+
+/* ─── MAIN APP ─────────────────────────────────────── */
+#screen-app {
+  flex-direction: row;
+  min-height: 100vh;
+}
+
+/* ─── SIDEBAR ──────────────────────────────────────── */
+.sidebar {
+  width: 320px;
+  min-width: 280px;
+  background: var(--bg2);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  flex-shrink: 0;
+}
+
+.sidebar-header {
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.sidebar-logo {
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--accent);
+  letter-spacing: 0.04em;
+}
+
+.user-mini {
+  display: flex; align-items: center; gap: 0.6rem;
+}
+
+.user-mini img {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+}
+
+.user-mini span {
+  font-size: 0.82rem;
+  color: var(--text2);
+  font-family: var(--font-mono);
+}
+
+.sidebar-section {
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.sidebar-section-title {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text2);
+  margin-bottom: 1rem;
+  display: flex; align-items: center; gap: 0.4rem;
+}
+
+.sidebar-section-title::after {
+  content: '';
+  flex: 1; height: 1px;
+  background: var(--border);
+}
+
+/* Profile fields */
+.profile-avatar-row {
+  display: flex; align-items: center; gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.profile-avatar-wrap {
+  position: relative;
+}
+
+.profile-avatar-wrap img {
+  width: 52px; height: 52px;
+  border-radius: 50%;
+  border: 2px solid var(--border2);
+  object-fit: cover;
+}
+
+.profile-info h3 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.profile-info p {
+  font-size: 0.78rem;
+  color: var(--text2);
+  font-family: var(--font-mono);
+}
+
+.input-small {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+  font-family: var(--font-sans);
+  font-size: 0.82rem;
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.2s;
+  width: 100%;
+  margin-bottom: 0.6rem;
+}
+
+.input-small:focus { border-color: var(--accent); }
+.input-small::placeholder { color: var(--text2); opacity: 0.5; }
+
+textarea.input-small {
+  resize: vertical;
+  min-height: 70px;
+  font-family: var(--font-sans);
+  line-height: 1.5;
+}
+
+/* Color swatches */
+.color-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.color-field {
+  display: flex; align-items: center; gap: 0.5rem;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.4rem 0.6rem;
+}
+
+.color-field label {
+  font-size: 0.72rem;
+  color: var(--text2);
+  flex: 1;
+}
+
+.color-field input[type="color"] {
+  width: 22px; height: 22px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  border-radius: 4px;
+  padding: 0;
+}
+
+/* Font selector */
+.font-select {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.82rem;
+  color: var(--text);
+  outline: none;
+  width: 100%;
+  cursor: pointer;
+  margin-bottom: 0.6rem;
+}
+
+/* Theme toggle */
+.theme-chips {
+  display: flex; gap: 0.4rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.6rem;
+}
+
+.theme-chip {
+  padding: 0.3rem 0.75rem;
+  border-radius: 99px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  background: var(--bg3);
+  color: var(--text2);
+  transition: all 0.15s;
+}
+
+.theme-chip.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+/* Repo list in sidebar */
+.repo-list-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.repo-item-sidebar {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.5rem 0.6rem;
+  border-radius: 8px;
+  background: var(--bg3);
+  border: 1px solid transparent;
+  transition: border-color 0.15s;
+  cursor: pointer;
+}
+
+.repo-item-sidebar.featured {
+  border-color: var(--accent);
+  background: rgba(124,109,250,0.08);
+}
+
+.repo-item-sidebar .repo-name {
+  font-size: 0.78rem;
+  font-family: var(--font-mono);
+  color: var(--text);
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.repo-item-sidebar .star-icon {
+  font-size: 0.9em;
+  opacity: 0.5;
+  transition: opacity 0.15s;
+}
+
+.repo-item-sidebar.featured .star-icon { opacity: 1; color: var(--yellow); }
+
+.repo-check {
+  width: 16px; height: 16px;
+  border: 1px solid var(--border2);
+  border-radius: 4px;
+  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+}
+
+.repo-item-sidebar.featured .repo-check {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+  font-size: 0.65rem;
+}
+
+/* Section toggles */
+.section-toggles {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.4rem 0;
+}
+
+.toggle-label {
+  font-size: 0.82rem;
+  color: var(--text);
+}
+
+.toggle-switch {
+  position: relative;
+  width: 36px; height: 20px;
+}
+
+.toggle-switch input { display: none; }
+
+.toggle-track {
+  position: absolute; inset: 0;
+  background: var(--bg3);
+  border: 1px solid var(--border2);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.toggle-track::after {
+  content: '';
+  position: absolute;
+  top: 2px; left: 2px;
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  background: var(--text2);
+  transition: transform 0.2s, background 0.2s;
+}
+
+.toggle-switch input:checked + .toggle-track {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.toggle-switch input:checked + .toggle-track::after {
+  transform: translateX(16px);
+  background: #fff;
+}
+
+/* Sidebar actions */
+.sidebar-actions {
+  padding: 1.25rem 1.5rem;
+  margin-top: auto;
+  border-top: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.btn-export {
+  width: 100%;
+  padding: 0.8rem 1.25rem;
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+  border: none;
+  border-radius: 10px;
+  color: #fff;
+  font-family: var(--font-sans);
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.15s;
+  box-shadow: 0 4px 16px rgba(124,109,250,0.3);
+  display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+}
+
+.btn-export:hover { opacity: 0.9; transform: translateY(-1px); }
+
+.btn-reset {
+  width: 100%;
+  padding: 0.7rem 1.25rem;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text2);
+  font-family: var(--font-sans);
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: background 0.2s;
+  display: flex; align-items: center; justify-content: center; gap: 0.4rem;
+}
+
+.btn-reset:hover { background: var(--bg3); color: var(--text); }
+
+/* ─── PREVIEW AREA ─────────────────────────────────── */
+.preview-area {
+  flex: 1;
+  overflow-y: auto;
+  position: relative;
+}
+
+.preview-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: rgba(10,10,15,0.85);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  padding: 0.75rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.preview-label {
+  font-size: 0.75rem;
+  font-family: var(--font-mono);
+  color: var(--text2);
+  display: flex; align-items: center; gap: 0.4rem;
+}
+
+.preview-label span {
+  display: inline-block;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 6px var(--green);
+}
+
+.preview-actions {
+  display: flex; gap: 0.5rem;
+}
+
+.preview-scale-btns {
+  display: flex;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.scale-btn {
+  padding: 0.35rem 0.7rem;
+  background: none;
+  border: none;
+  color: var(--text2);
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  font-family: var(--font-mono);
+}
+
+.scale-btn:hover, .scale-btn.active { background: var(--accent); color: #fff; }
+
+.preview-content {
+  padding: 2rem;
+}
+
+.portfolio-frame {
+  background: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  max-width: 960px;
+  margin: 0 auto;
+  transform-origin: top center;
+  transition: transform 0.2s;
+}
+
+/* ─────────────────────────────────────────────────── */
+/*  PORTFOLIO TEMPLATE (renders inside .portfolio-frame) */
+/* ─────────────────────────────────────────────────── */
+
+.pf-root {
+  font-family: 'DM Sans', system-ui, sans-serif;
+  color: var(--pf-text, #1a1a2e);
+  background: var(--pf-bg, #ffffff);
+  min-height: 100vh;
+}
+
+/* Hero */
+.pf-hero {
+  background: var(--pf-hero-bg, #0a0a1a);
+  color: var(--pf-hero-text, #ffffff);
+  padding: 4rem 3rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.pf-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 70% 80% at 0% 50%, var(--pf-accent-glow, rgba(124,109,250,0.2)) 0%, transparent 65%),
+    radial-gradient(ellipse 40% 60% at 100% 20%, var(--pf-accent2-glow, rgba(168,85,247,0.15)) 0%, transparent 60%);
+}
+
+.pf-hero-inner {
+  position: relative;
+  max-width: 800px;
+}
+
+.pf-avatar-row {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.pf-avatar {
+  width: 80px; height: 80px;
+  border-radius: 50%;
+  border: 3px solid rgba(255,255,255,0.2);
+  object-fit: cover;
+}
+
+.pf-hero-name {
+  font-family: 'DM Serif Display', Georgia, serif;
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  margin-bottom: 0.5rem;
+}
+
+.pf-hero-username {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.9rem;
+  opacity: 0.6;
+  margin-bottom: 1rem;
+}
+
+.pf-hero-bio {
+  font-size: 1rem;
+  line-height: 1.65;
+  opacity: 0.85;
+  max-width: 560px;
+  margin-bottom: 1.5rem;
+}
+
+.pf-hero-stats {
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.pf-stat {
+  display: flex;
+  flex-direction: column;
+}
+
+.pf-stat-num {
+  font-family: 'DM Serif Display', serif;
+  font-size: 1.6rem;
+  color: var(--pf-accent, #7c6dfa);
+  line-height: 1;
+}
+
+.pf-stat-label {
+  font-size: 0.72rem;
+  opacity: 0.6;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-top: 0.15rem;
+}
+
+.pf-hero-links {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-top: 1.5rem;
+}
+
+.pf-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 1rem;
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 8px;
+  color: inherit;
+  text-decoration: none;
+  font-size: 0.82rem;
+  font-weight: 500;
+  transition: background 0.2s;
+}
+
+.pf-link:hover { background: rgba(255,255,255,0.18); }
+
+/* Nav */
+.pf-nav {
+  background: var(--pf-nav-bg, #f8f8fc);
+  border-bottom: 1px solid var(--pf-border, #e0e0f0);
+  padding: 0 3rem;
+  display: flex;
+  gap: 0;
+  overflow-x: auto;
+}
+
+.pf-nav-item {
+  padding: 1rem 1.25rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--pf-text2, #666688);
+  text-decoration: none;
+  border-bottom: 2px solid transparent;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.pf-nav-item:hover, .pf-nav-item.active {
+  color: var(--pf-accent, #7c6dfa);
+  border-bottom-color: var(--pf-accent, #7c6dfa);
+}
+
+/* Sections */
+.pf-section {
+  padding: 3rem;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.pf-section + .pf-section {
+  border-top: 1px solid var(--pf-border, #e8e8f4);
+}
+
+.pf-section-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: 1.6rem;
+  color: var(--pf-text, #1a1a2e);
+  margin-bottom: 0.35rem;
+  letter-spacing: -0.01em;
+}
+
+.pf-section-sub {
+  font-size: 0.85rem;
+  color: var(--pf-text2, #666688);
+  margin-bottom: 2rem;
+}
+
+/* Featured repos */
+.pf-repos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 1rem;
+}
+
+.pf-repo-card {
+  background: var(--pf-card-bg, #f8f8fc);
+  border: 1px solid var(--pf-border, #e0e0f0);
+  border-radius: 12px;
+  padding: 1.25rem;
+  text-decoration: none;
+  color: inherit;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  transition: border-color 0.2s, transform 0.15s, box-shadow 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+
+.pf-repo-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--pf-accent, #7c6dfa), var(--pf-accent2, #a855f7));
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.pf-repo-card:hover { border-color: var(--pf-accent, #7c6dfa); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.08); }
+.pf-repo-card:hover::before { opacity: 1; }
+
+.pf-repo-name {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--pf-accent, #7c6dfa);
+}
+
+.pf-repo-desc {
+  font-size: 0.82rem;
+  color: var(--pf-text2, #666688);
+  line-height: 1.5;
+  flex: 1;
+}
+
+.pf-repo-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.75rem;
+  color: var(--pf-text2, #888);
+  margin-top: 0.25rem;
+}
+
+.pf-repo-lang {
+  display: flex; align-items: center; gap: 0.3rem;
+}
+
+.pf-lang-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: var(--pf-accent, #7c6dfa);
+  flex-shrink: 0;
+}
+
+/* All repos table */
+.pf-repos-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.pf-repos-table th {
+  text-align: left;
+  padding: 0.6rem 1rem;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--pf-text2, #888);
+  border-bottom: 1px solid var(--pf-border, #e0e0f0);
+}
+
+.pf-repos-table td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--pf-border, #f0f0f8);
+  vertical-align: middle;
+}
+
+.pf-repos-table tr:last-child td { border-bottom: none; }
+
+.pf-repos-table tr:hover td { background: var(--pf-card-bg, #f8f8fc); }
+
+.pf-table-name {
+  font-family: 'DM Mono', monospace;
+  color: var(--pf-accent, #7c6dfa);
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.pf-table-name:hover { text-decoration: underline; }
+
+.pf-badge {
+  display: inline-block;
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 500;
+  background: var(--pf-badge-bg, rgba(124,109,250,0.1));
+  color: var(--pf-accent, #7c6dfa);
+}
+
+/* Skills section */
+.pf-skills-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.pf-skill-tag {
+  padding: 0.35rem 0.9rem;
+  border-radius: 99px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  background: var(--pf-badge-bg, rgba(124,109,250,0.08));
+  color: var(--pf-accent, #7c6dfa);
+  border: 1px solid var(--pf-border, rgba(124,109,250,0.2));
+}
+
+/* Activity chart */
+.pf-activity {
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  height: 60px;
+  overflow: hidden;
+}
+
+.pf-act-bar {
+  flex: 1;
+  background: var(--pf-badge-bg, rgba(124,109,250,0.15));
+  border-radius: 3px 3px 0 0;
+  min-height: 4px;
+  transition: background 0.2s;
+}
+
+.pf-act-bar:hover { background: var(--pf-accent, #7c6dfa); }
+
+/* Footer */
+.pf-footer {
+  background: var(--pf-hero-bg, #0a0a1a);
+  color: rgba(255,255,255,0.5);
+  padding: 2rem 3rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.pf-footer-brand {
+  font-family: 'DM Mono', monospace;
+  color: rgba(255,255,255,0.7);
+}
+
+/* ─── THEMES ────────────────────────────────────────── */
+.theme-dark .pf-root {
+  --pf-bg: #0d0d1a;
+  --pf-text: #e8e8f8;
+  --pf-text2: #8888bb;
+  --pf-nav-bg: #111122;
+  --pf-card-bg: #1a1a2e;
+  --pf-border: #2a2a44;
+  --pf-badge-bg: rgba(124,109,250,0.12);
+}
+
+.theme-minimal .pf-root {
+  --pf-hero-bg: #18181b;
+  --pf-hero-text: #ffffff;
+  --pf-accent: #22c55e;
+  --pf-accent2: #16a34a;
+  --pf-accent-glow: rgba(34,197,94,0.15);
+  --pf-accent2-glow: rgba(22,163,74,0.1);
+  --pf-badge-bg: rgba(34,197,94,0.08);
+}
+
+.theme-ocean .pf-root {
+  --pf-hero-bg: #0c1220;
+  --pf-hero-text: #e0f0ff;
+  --pf-accent: #0ea5e9;
+  --pf-accent2: #6366f1;
+  --pf-accent-glow: rgba(14,165,233,0.2);
+  --pf-accent2-glow: rgba(99,102,241,0.15);
+  --pf-badge-bg: rgba(14,165,233,0.08);
+}
+
+.theme-rose .pf-root {
+  --pf-hero-bg: #1c0a14;
+  --pf-hero-text: #ffe4f0;
+  --pf-accent: #f43f5e;
+  --pf-accent2: #ec4899;
+  --pf-accent-glow: rgba(244,63,94,0.2);
+  --pf-accent2-glow: rgba(236,72,153,0.15);
+  --pf-badge-bg: rgba(244,63,94,0.08);
+}
+
+/* ─── RESPONSIVE ─────────────────────────────────────── */
+@media (max-width: 900px) {
+  #screen-app { flex-direction: column; }
+  .sidebar { width: 100%; min-width: unset; max-height: 50vh; border-right: none; border-bottom: 1px solid var(--border); }
+  .preview-content { padding: 1rem; }
+}
+
+@media (max-width: 600px) {
+  .login-card { padding: 2rem 1.5rem; }
+  .pf-hero { padding: 2rem 1.5rem; }
+  .pf-section { padding: 2rem 1.5rem; }
+}
+
+/* ─── UTILS ──────────────────────────────────────────── */
+.hidden { display: none !important; }
+.spin { animation: spin 1s linear infinite; }
+
+/* Toast */
+.toast {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 0.75rem 1.25rem;
+  font-size: 0.85rem;
+  color: var(--text);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  z-index: 1000;
+  transform: translateY(10px);
+  opacity: 0;
+  transition: all 0.3s;
+  pointer-events: none;
+  display: flex; align-items: center; gap: 0.5rem;
+}
+
+.toast.show {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.toast.success { border-color: rgba(34,211,160,0.4); color: var(--green); }
+.toast.error { border-color: rgba(248,113,113,0.4); color: var(--red); }
+
+/* Mobile menu toggle */
+.mobile-sidebar-toggle {
+  display: none;
+  position: fixed;
+  bottom: 1.5rem;
+  left: 1.5rem;
+  z-index: 100;
+  width: 48px; height: 48px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: none;
+  color: #fff;
+  font-size: 1.2rem;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(124,109,250,0.4);
+  align-items: center;
+  justify-content: center;
+}
+
+@media (max-width: 900px) { .mobile-sidebar-toggle { display: flex; } }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text2); }
+</style>
+</head>
+<body>
+
+<!-- ─── SCREEN: LOGIN ──────────────────────────────── -->
+<div id="screen-login" class="screen active">
+  <div class="login-bg"></div>
+  <div class="login-grid"></div>
+  <div class="login-card">
+    <div class="login-badge"><span>⬡</span> GitHub Portfolio Generator</div>
+    <h1 class="login-title">Build your<br><em>developer portfolio</em><br>in seconds.</h1>
+    <p class="login-sub">Connect your GitHub account to automatically generate a beautiful, customizable portfolio — then export it as a standalone HTML file.</p>
+
+    <div class="field-group">
+      <label class="field-label" for="gh-username">GitHub Username <span class="req">*</span></label>
+      <input id="gh-username" class="field-input" type="text" placeholder="e.g. torvalds" autocomplete="off" spellcheck="false"/>
+    </div>
+
+    <div class="divider">or add a token for private repos</div>
+
+    <div class="field-group">
+      <label class="field-label" for="gh-token">Personal Access Token <span style="color:var(--text2);font-weight:400;">(optional)</span></label>
+      <input id="gh-token" class="field-input" type="password" placeholder="ghp_..." autocomplete="off" spellcheck="false"/>
+      <p class="field-hint">
+        Needed to include private repos & avoid rate limits. Generate one at
+        <a href="https://github.com/settings/tokens" target="_blank" rel="noopener">github.com/settings/tokens</a>
+        with <code>read:user</code>, <code>repo</code> scopes.
+      </p>
+    </div>
+
+    <div id="login-error" class="error-msg">User not found. Please check the username.</div>
+
+    <button id="btn-generate" class="btn-primary" onclick="startGenerate()">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+      Generate Portfolio
+    </button>
+  </div>
+</div>
+
+<!-- ─── SCREEN: LOADING ────────────────────────────── -->
+<div id="screen-loading" class="screen">
+  <div class="loader-ring"></div>
+  <div class="loader-steps">
+    <div class="loader-step" id="step-1">Fetching profile...</div>
+    <div class="loader-step" id="step-2">Loading repositories...</div>
+    <div class="loader-step" id="step-3">Detecting languages...</div>
+    <div class="loader-step" id="step-4">Building portfolio...</div>
+  </div>
+</div>
+
+<!-- ─── SCREEN: APP ────────────────────────────────── -->
+<div id="screen-app" class="screen">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+
+    <div class="sidebar-header">
+      <div class="sidebar-logo">⬡ PortfolioGen</div>
+      <div class="user-mini">
+        <img id="sb-avatar" src="" alt=""/>
+        <span id="sb-username"></span>
+      </div>
+    </div>
+
+    <!-- Profile customization -->
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Profile</div>
+      <div class="profile-avatar-row">
+        <div class="profile-avatar-wrap">
+          <img id="pf-avatar-thumb" src="" alt=""/>
+        </div>
+        <div class="profile-info">
+          <h3 id="pf-name-display"></h3>
+          <p id="pf-login-display"></p>
+        </div>
+      </div>
+      <input id="edit-name" class="input-small" type="text" placeholder="Display name"/>
+      <input id="edit-headline" class="input-small" type="text" placeholder="Headline / job title"/>
+      <textarea id="edit-bio" class="input-small" placeholder="Bio / about me"></textarea>
+      <input id="edit-location" class="input-small" type="text" placeholder="📍 Location"/>
+      <input id="edit-website" class="input-small" type="text" placeholder="🌐 Website URL"/>
+      <input id="edit-twitter" class="input-small" type="text" placeholder="𝕏 Twitter / X handle"/>
+    </div>
+
+    <!-- Theme -->
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Theme</div>
+      <div class="theme-chips">
+        <div class="theme-chip active" onclick="setTheme('default',this)">Purple</div>
+        <div class="theme-chip" onclick="setTheme('dark',this)">Dark</div>
+        <div class="theme-chip" onclick="setTheme('minimal',this)">Minimal</div>
+        <div class="theme-chip" onclick="setTheme('ocean',this)">Ocean</div>
+        <div class="theme-chip" onclick="setTheme('rose',this)">Rose</div>
+      </div>
+      <div class="color-grid">
+        <div class="color-field">
+          <label>Accent</label>
+          <input type="color" id="color-accent" value="#7c6dfa" oninput="applyAccentColor(this.value)"/>
+        </div>
+        <div class="color-field">
+          <label>Hero BG</label>
+          <input type="color" id="color-hero" value="#0a0a1a" oninput="applyHeroBg(this.value)"/>
+        </div>
+        <div class="color-field">
+          <label>Page BG</label>
+          <input type="color" id="color-bg" value="#ffffff" oninput="applyPageBg(this.value)"/>
+        </div>
+        <div class="color-field">
+          <label>Text</label>
+          <input type="color" id="color-text" value="#1a1a2e" oninput="applyTextColor(this.value)"/>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sections toggle -->
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Sections</div>
+      <div class="section-toggles">
+        <div class="toggle-row">
+          <span class="toggle-label">Featured Projects</span>
+          <label class="toggle-switch">
+            <input type="checkbox" id="toggle-featured" checked onchange="toggleSection('featured',this.checked)"/>
+            <div class="toggle-track"></div>
+          </label>
+        </div>
+        <div class="toggle-row">
+          <span class="toggle-label">All Repositories</span>
+          <label class="toggle-switch">
+            <input type="checkbox" id="toggle-repos" checked onchange="toggleSection('repos',this.checked)"/>
+            <div class="toggle-track"></div>
+          </label>
+        </div>
+        <div class="toggle-row">
+          <span class="toggle-label">Skills / Languages</span>
+          <label class="toggle-switch">
+            <input type="checkbox" id="toggle-skills" checked onchange="toggleSection('skills',this.checked)"/>
+            <div class="toggle-track"></div>
+          </label>
+        </div>
+        <div class="toggle-row">
+          <span class="toggle-label">GitHub Stats</span>
+          <label class="toggle-switch">
+            <input type="checkbox" id="toggle-stats" checked onchange="toggleSection('stats',this.checked)"/>
+            <div class="toggle-track"></div>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Featured repos picker -->
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Featured Repos</div>
+      <div class="repo-list-sidebar" id="repo-picker"></div>
+    </div>
+
+    <!-- Actions -->
+    <div class="sidebar-actions">
+      <button class="btn-export" onclick="exportHTML()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Export HTML
+      </button>
+      <button class="btn-reset" onclick="goBack()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+        Start Over
+      </button>
+    </div>
+  </aside>
+
+  <!-- PREVIEW -->
+  <main class="preview-area">
+    <div class="preview-toolbar">
+      <div class="preview-label">
+        <span></span> Live Preview
+      </div>
+      <div class="preview-actions">
+        <div class="preview-scale-btns">
+          <button class="scale-btn active" onclick="setScale(1,this)" title="Full size">100%</button>
+          <button class="scale-btn" onclick="setScale(0.75,this)" title="Compact">75%</button>
+          <button class="scale-btn" onclick="setScale(0.5,this)" title="Mobile view">50%</button>
+        </div>
+        <button class="btn-secondary" onclick="exportHTML()" style="font-size:0.8rem;padding:0.4rem 0.8rem;">
+          ↓ Export
+        </button>
+      </div>
+    </div>
+    <div class="preview-content">
+      <div class="portfolio-frame" id="portfolio-frame">
+        <!-- Portfolio rendered here -->
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- Mobile sidebar toggle -->
+<button class="mobile-sidebar-toggle" onclick="toggleMobileSidebar()">⚙</button>
+
+<script>
+// ─── STATE ──────────────────────────────────────────────
+let state = {
+  user: null,
+  repos: [],
+  featuredIds: new Set(),
+  theme: 'default',
+  sections: { featured: true, repos: true, skills: true, stats: true },
+  customColors: { accent: '#7c6dfa', hero: '#0a0a1a', bg: '#ffffff', text: '#1a1a2e' },
+  edits: { name: '', headline: '', bio: '', location: '', website: '', twitter: '' },
+  token: '',
+  scale: 1
+};
+
+const LANG_COLORS = {
+  JavaScript:'#f1e05a', TypeScript:'#3178c6', Python:'#3572A5', Rust:'#dea584',
+  Go:'#00ADD8', Java:'#b07219', 'C++'  :'#f34b7d', C:'#555555', Ruby:'#701516',
+  PHP:'#4F5D95', Swift:'#F05138', Kotlin:'#A97BFF', Dart:'#00B4AB',
+  HTML:'#e34c26', CSS:'#563d7c', Shell:'#89e051', Vue:'#41b883',
+  'C#':'#178600', Scala:'#c22d40', Elixir:'#6e4a7e', Haskell:'#5e5086',
+  R:'#198CE7', SCSS:'#c6538c', default:'#8888bb'
+};
+
+// ─── SCREEN TRANSITIONS ─────────────────────────────────
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + id).classList.add('active');
+}
+
+// ─── LOGIN / GENERATE ───────────────────────────────────
+async function startGenerate() {
+  const username = document.getElementById('gh-username').value.trim();
+  const token = document.getElementById('gh-token').value.trim();
+  const errEl = document.getElementById('login-error');
+  const btn = document.getElementById('btn-generate');
+
+  if (!username) { showError('Please enter a GitHub username.'); return; }
+  errEl.classList.remove('show');
+  btn.disabled = true;
+  btn.innerHTML = '<div class="loader-ring" style="width:18px;height:18px;border-width:2px;"></div> Loading...';
+
+  state.token = token;
+
+  try {
+    showScreen('loading');
+    await fetchData(username, token);
+    buildApp();
+    showScreen('app');
+  } catch(e) {
+    showScreen('login');
+    showError(e.message || 'Failed to load GitHub data.');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg> Generate Portfolio';
+  }
+}
+
+function showError(msg) {
+  const el = document.getElementById('login-error');
+  el.textContent = msg;
+  el.classList.add('show');
+}
+
+// ─── FETCH GITHUB DATA ──────────────────────────────────
+function ghFetch(url) {
+  const headers = { 'Accept': 'application/vnd.github.v3+json' };
+  if (state.token) headers['Authorization'] = 'token ' + state.token;
+  return fetch(url, { headers });
+}
+
+async function setStep(n) {
+  document.querySelectorAll('.loader-step').forEach((s,i) => {
+    if(i < n) s.className = 'loader-step done';
+    else if(i === n) s.className = 'loader-step active';
+    else s.className = 'loader-step';
+  });
+  await new Promise(r => setTimeout(r, 350));
+}
+
+async function fetchData(username, token) {
+  await setStep(0);
+  const userRes = await ghFetch(`https://api.github.com/users/${username}`);
+  if (!userRes.ok) throw new Error(userRes.status === 404 ? 'User not found.' : 'GitHub API error: ' + userRes.status);
+  state.user = await userRes.json();
+
+  await setStep(1);
+  // Fetch up to 100 repos
+  const repoRes = await ghFetch(`https://api.github.com/users/${username}/repos?per_page=100&sort=updated&type=owner`);
+  if (!repoRes.ok) throw new Error('Failed to fetch repos.');
+  let repos = await repoRes.json();
+  repos = repos.filter(r => !r.fork).sort((a,b) => b.stargazers_count - a.stargazers_count);
+  state.repos = repos;
+
+  await setStep(2);
+  await new Promise(r => setTimeout(r, 200));
+
+  await setStep(3);
+  // Auto-select top 6 repos as featured
+  state.featuredIds = new Set(
+    repos.slice(0, 6).map(r => r.id)
+  );
+  await new Promise(r => setTimeout(r, 200));
+}
+
+// ─── BUILD APP UI ───────────────────────────────────────
+function buildApp() {
+  const u = state.user;
+
+  // Sidebar header
+  document.getElementById('sb-avatar').src = u.avatar_url;
+  document.getElementById('sb-username').textContent = '@' + u.login;
+  document.getElementById('pf-avatar-thumb').src = u.avatar_url;
+  document.getElementById('pf-name-display').textContent = u.name || u.login;
+  document.getElementById('pf-login-display').textContent = '@' + u.login;
+
+  // Fill editable fields
+  document.getElementById('edit-name').value = u.name || '';
+  document.getElementById('edit-bio').value = u.bio || '';
+  document.getElementById('edit-location').value = u.location || '';
+  document.getElementById('edit-website').value = u.blog || '';
+
+  // Add live input listeners
+  ['name','headline','bio','location','website','twitter'].forEach(k => {
+    const el = document.getElementById('edit-' + k);
+    el.addEventListener('input', () => {
+      state.edits[k] = el.value;
+      renderPortfolio();
+    });
+  });
+
+  buildRepoPicker();
+  renderPortfolio();
+}
+
+// ─── REPO PICKER ────────────────────────────────────────
+function buildRepoPicker() {
+  const container = document.getElementById('repo-picker');
+  container.innerHTML = '';
+  state.repos.forEach(repo => {
+    const item = document.createElement('div');
+    item.className = 'repo-item-sidebar' + (state.featuredIds.has(repo.id) ? ' featured' : '');
+    item.id = 'pick-' + repo.id;
+    item.onclick = () => toggleFeatured(repo.id);
+    item.innerHTML = `
+      <div class="repo-check">${state.featuredIds.has(repo.id) ? '✓' : ''}</div>
+      <span class="repo-name">${repo.name}</span>
+      <span class="star-icon">★</span>
+    `;
+    container.appendChild(item);
+  });
+}
+
+function toggleFeatured(id) {
+  if (state.featuredIds.has(id)) {
+    state.featuredIds.delete(id);
+    const el = document.getElementById('pick-' + id);
+    if (el) { el.classList.remove('featured'); el.querySelector('.repo-check').textContent = ''; }
+  } else {
+    if (state.featuredIds.size >= 9) { showToast('Max 9 featured repos', 'error'); return; }
+    state.featuredIds.add(id);
+    const el = document.getElementById('pick-' + id);
+    if (el) { el.classList.add('featured'); el.querySelector('.repo-check').textContent = '✓'; }
+  }
+  renderPortfolio();
+}
+
+// ─── RENDER PORTFOLIO ───────────────────────────────────
+function renderPortfolio() {
+  const frame = document.getElementById('portfolio-frame');
+  frame.className = 'portfolio-frame theme-' + (state.theme !== 'default' ? state.theme : '');
+  frame.innerHTML = buildPortfolioHTML(false);
+  applyColorVars(frame);
+}
+
+function buildPortfolioHTML(standalone = true) {
+  const u = state.user;
+  const edits = state.edits;
+
+  const name = edits.name || u.name || u.login;
+  const bio = edits.bio || u.bio || '';
+  const location = edits.location || u.location || '';
+  const website = edits.website || u.blog || '';
+  const twitter = edits.twitter || u.twitter_username || '';
+  const headline = edits.headline || '';
+
+  const featuredRepos = state.repos.filter(r => state.featuredIds.has(r.id));
+  const allRepos = state.repos;
+
+  // Compute skills from languages
+  const langCounts = {};
+  allRepos.forEach(r => { if(r.language) langCounts[r.language] = (langCounts[r.language]||0) + r.stargazers_count + 1; });
+  const topLangs = Object.entries(langCounts).sort((a,b)=>b[1]-a[1]).map(e=>e[0]);
+
+  // Stats
+  const totalStars = allRepos.reduce((s,r)=>s+r.stargazers_count,0);
+  const totalForks = allRepos.reduce((s,r)=>s+r.forks_count,0);
+
+  // Activity bars (mock based on updated_at months)
+  const months = {};
+  allRepos.forEach(r => {
+    const m = r.updated_at?.slice(0,7);
+    if(m) months[m] = (months[m]||0) + 1;
+  });
+  const monthKeys = Object.keys(months).sort().slice(-12);
+  const maxM = Math.max(...monthKeys.map(m=>months[m]),1);
+  const actBars = monthKeys.map(m => `<div class="pf-act-bar" style="height:${Math.round(months[m]/maxM*100)}%" title="${m}: ${months[m]} repos"></div>`).join('');
+
+  const themeClass = state.theme !== 'default' ? 'theme-' + state.theme : '';
+  const themeBodyClass = standalone ? themeClass : '';
+
+  const customCSS = `
+    .pf-root { --pf-accent: ${state.customColors.accent}; --pf-hero-bg: ${state.customColors.hero}; --pf-bg: ${state.customColors.bg}; --pf-text: ${state.customColors.text}; }
+  `;
+
+  return `${standalone ? `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>${escHtml(name)} — Portfolio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',system-ui,sans-serif;background:var(--pf-bg,#fff);color:var(--pf-text,#1a1a2e)}
+${PORTFOLIO_CSS}
+${customCSS}
+</style>
+</head>
+<body class="${themeBodyClass}">` : ''}
+<div class="pf-root">
+
+  <!-- HERO -->
+  <div class="pf-hero">
+    <div class="pf-hero-inner">
+      <div class="pf-avatar-row">
+        <img class="pf-avatar" src="${escHtml(u.avatar_url)}" alt="${escHtml(name)}"/>
+        <div>
+          <div style="font-size:0.8rem;opacity:0.55;font-family:'DM Mono',monospace;margin-bottom:0.2rem;">@${escHtml(u.login)}</div>
+          ${headline ? `<div style="font-size:0.85rem;opacity:0.7;margin-bottom:0.4rem;">${escHtml(headline)}</div>` : ''}
+          ${location ? `<div style="font-size:0.8rem;opacity:0.55;">📍 ${escHtml(location)}</div>` : ''}
+        </div>
+      </div>
+      <h1 class="pf-hero-name">${escHtml(name)}</h1>
+      ${bio ? `<p class="pf-hero-bio">${escHtml(bio)}</p>` : ''}
+
+      ${state.sections.stats ? `
+      <div class="pf-hero-stats">
+        <div class="pf-stat"><div class="pf-stat-num">${allRepos.length}</div><div class="pf-stat-label">Repositories</div></div>
+        <div class="pf-stat"><div class="pf-stat-num">${totalStars}</div><div class="pf-stat-label">Stars Earned</div></div>
+        <div class="pf-stat"><div class="pf-stat-num">${totalForks}</div><div class="pf-stat-label">Total Forks</div></div>
+        ${u.followers ? `<div class="pf-stat"><div class="pf-stat-num">${u.followers}</div><div class="pf-stat-label">Followers</div></div>` : ''}
+      </div>` : ''}
+
+      <div class="pf-hero-links">
+        <a class="pf-link" href="https://github.com/${escHtml(u.login)}" target="_blank" rel="noopener">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+          GitHub
+        </a>
+        ${website ? `<a class="pf-link" href="${escHtml(website.startsWith('http')?website:'https://'+website)}" target="_blank" rel="noopener">🌐 Website</a>` : ''}
+        ${twitter ? `<a class="pf-link" href="https://twitter.com/${escHtml(twitter)}" target="_blank" rel="noopener">𝕏 @${escHtml(twitter)}</a>` : ''}
+        ${u.email ? `<a class="pf-link" href="mailto:${escHtml(u.email)}">✉ Email</a>` : ''}
+      </div>
+    </div>
+  </div>
+
+  <!-- FEATURED PROJECTS -->
+  ${state.sections.featured && featuredRepos.length > 0 ? `
+  <div class="pf-section" id="pf-featured">
+    <h2 class="pf-section-title">Featured Projects</h2>
+    <p class="pf-section-sub">Hand-picked repositories I'm most proud of</p>
+    <div class="pf-repos-grid">
+      ${featuredRepos.map(r => `
+      <a class="pf-repo-card" href="${escHtml(r.html_url)}" target="_blank" rel="noopener">
+        <div class="pf-repo-name">${escHtml(r.name)}</div>
+        <div class="pf-repo-desc">${escHtml(r.description||'No description')}</div>
+        <div class="pf-repo-meta">
+          ${r.language ? `<div class="pf-repo-lang"><div class="pf-lang-dot" style="background:${LANG_COLORS[r.language]||LANG_COLORS.default}"></div>${escHtml(r.language)}</div>` : ''}
+          <div>★ ${r.stargazers_count}</div>
+          <div>⑂ ${r.forks_count}</div>
+        </div>
+      </a>`).join('')}
+    </div>
+  </div>` : ''}
+
+  <!-- SKILLS -->
+  ${state.sections.skills && topLangs.length > 0 ? `
+  <div class="pf-section" id="pf-skills">
+    <h2 class="pf-section-title">Skills & Technologies</h2>
+    <p class="pf-section-sub">Languages detected across all repositories</p>
+    <div class="pf-skills-wrap">
+      ${topLangs.map(l => `<div class="pf-skill-tag" style="background:${LANG_COLORS[l]||LANG_COLORS.default}18;color:${LANG_COLORS[l]||LANG_COLORS.default};border-color:${LANG_COLORS[l]||LANG_COLORS.default}44">${escHtml(l)}</div>`).join('')}
+    </div>
+    ${actBars ? `
+    <div style="margin-top:2rem">
+      <div style="font-size:0.8rem;color:var(--pf-text2,#888);margin-bottom:0.5rem;text-transform:uppercase;letter-spacing:0.06em;font-size:0.72rem;">Recent Activity (last 12 months)</div>
+      <div class="pf-activity">${actBars}</div>
+    </div>` : ''}
+  </div>` : ''}
+
+  <!-- ALL REPOS -->
+  ${state.sections.repos ? `
+  <div class="pf-section" id="pf-repos">
+    <h2 class="pf-section-title">All Repositories</h2>
+    <p class="pf-section-sub">${allRepos.length} public repositories, sorted by stars</p>
+    <table class="pf-repos-table">
+      <thead>
+        <tr>
+          <th>Repository</th>
+          <th>Language</th>
+          <th>Stars</th>
+          <th>Forks</th>
+          <th>Updated</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${allRepos.map(r => `
+        <tr>
+          <td>
+            <a class="pf-table-name" href="${escHtml(r.html_url)}" target="_blank" rel="noopener">${escHtml(r.name)}</a>
+            ${r.description ? `<div style="font-size:0.75rem;color:var(--pf-text2,#888);margin-top:2px">${escHtml(r.description.slice(0,80))}${r.description.length>80?'…':''}</div>` : ''}
+          </td>
+          <td>${r.language ? `<div style="display:flex;align-items:center;gap:5px"><div style="width:9px;height:9px;border-radius:50%;background:${LANG_COLORS[r.language]||LANG_COLORS.default};flex-shrink:0"></div><span style="font-size:0.8rem">${escHtml(r.language)}</span></div>` : '<span style="color:#aaa">—</span>'}</td>
+          <td style="font-family:'DM Mono',monospace;font-size:0.82rem">★ ${r.stargazers_count}</td>
+          <td style="font-family:'DM Mono',monospace;font-size:0.82rem">⑂ ${r.forks_count}</td>
+          <td style="font-size:0.75rem;color:var(--pf-text2,#888)">${new Date(r.updated_at).toLocaleDateString('en',{month:'short',year:'numeric'})}</td>
+        </tr>`).join('')}
+      </tbody>
+    </table>
+  </div>` : ''}
+
+  <!-- FOOTER -->
+  <div class="pf-footer">
+    <div class="pf-footer-brand">@${escHtml(u.login)}</div>
+    <div>Generated with <a href="https://github.com" style="color:inherit">GitHub Portfolio Generator</a></div>
+    <div>${new Date().getFullYear()}</div>
+  </div>
+
+</div>
+${standalone ? '</body></html>' : ''}`;
+}
+
+function escHtml(s) {
+  if (!s) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ─── CUSTOMIZATION ──────────────────────────────────────
+function setTheme(name, el) {
+  state.theme = name;
+  document.querySelectorAll('.theme-chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  renderPortfolio();
+}
+
+function applyColorVars(frame) {
+  const root = frame.querySelector('.pf-root');
+  if (!root) return;
+  root.style.setProperty('--pf-accent', state.customColors.accent);
+  root.style.setProperty('--pf-hero-bg', state.customColors.hero);
+  root.style.setProperty('--pf-bg', state.customColors.bg);
+  root.style.setProperty('--pf-text', state.customColors.text);
+}
+
+function applyAccentColor(v) { state.customColors.accent = v; applyColorVars(document.getElementById('portfolio-frame')); }
+function applyHeroBg(v) { state.customColors.hero = v; applyColorVars(document.getElementById('portfolio-frame')); }
+function applyPageBg(v) { state.customColors.bg = v; applyColorVars(document.getElementById('portfolio-frame')); }
+function applyTextColor(v) { state.customColors.text = v; applyColorVars(document.getElementById('portfolio-frame')); }
+
+function toggleSection(name, val) {
+  state.sections[name] = val;
+  renderPortfolio();
+}
+
+function setScale(s, btn) {
+  state.scale = s;
+  document.querySelectorAll('.scale-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('portfolio-frame').style.transform = `scale(${s})`;
+  document.getElementById('portfolio-frame').style.marginBottom = s < 1 ? `${(s-1)*100}%` : '0';
+}
+
+// ─── EXPORT ─────────────────────────────────────────────
+const PORTFOLIO_CSS = `
+.pf-hero{background:var(--pf-hero-bg,#0a0a1a);color:var(--pf-hero-text,#fff);padding:4rem 3rem;position:relative;overflow:hidden}
+.pf-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 70% 80% at 0% 50%,var(--pf-accent-glow,rgba(124,109,250,.2)) 0%,transparent 65%),radial-gradient(ellipse 40% 60% at 100% 20%,rgba(168,85,247,.12) 0%,transparent 60%)}
+.pf-hero-inner{position:relative;max-width:800px}
+.pf-avatar-row{display:flex;align-items:center;gap:1.5rem;margin-bottom:1.5rem}
+.pf-avatar{width:80px;height:80px;border-radius:50%;border:3px solid rgba(255,255,255,.2);object-fit:cover}
+.pf-hero-name{font-family:'DM Serif Display',Georgia,serif;font-size:clamp(2rem,5vw,3.5rem);line-height:1.1;letter-spacing:-.02em;margin-bottom:.5rem}
+.pf-hero-username{font-family:'DM Mono',monospace;font-size:.9rem;opacity:.6;margin-bottom:1rem}
+.pf-hero-bio{font-size:1rem;line-height:1.65;opacity:.85;max-width:560px;margin-bottom:1.5rem}
+.pf-hero-stats{display:flex;gap:1.5rem;flex-wrap:wrap}
+.pf-stat{display:flex;flex-direction:column}
+.pf-stat-num{font-family:'DM Serif Display',serif;font-size:1.6rem;color:var(--pf-accent,#7c6dfa);line-height:1}
+.pf-stat-label{font-size:.72rem;opacity:.6;text-transform:uppercase;letter-spacing:.08em;margin-top:.15rem}
+.pf-hero-links{display:flex;gap:.75rem;flex-wrap:wrap;margin-top:1.5rem}
+.pf-link{display:inline-flex;align-items:center;gap:.4rem;padding:.5rem 1rem;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);border-radius:8px;color:inherit;text-decoration:none;font-size:.82rem;font-weight:500;transition:background .2s}
+.pf-link:hover{background:rgba(255,255,255,.18)}
+.pf-nav{background:var(--pf-nav-bg,#f8f8fc);border-bottom:1px solid var(--pf-border,#e0e0f0);padding:0 3rem;display:flex;gap:0;overflow-x:auto}
+.pf-nav-item{padding:1rem 1.25rem;font-size:.85rem;font-weight:500;color:var(--pf-text2,#666688);text-decoration:none;border-bottom:2px solid transparent;white-space:nowrap}
+.pf-section{padding:3rem;max-width:900px;margin:0 auto}
+.pf-section+.pf-section{border-top:1px solid var(--pf-border,#e8e8f4)}
+.pf-section-title{font-family:'DM Serif Display',serif;font-size:1.6rem;color:var(--pf-text,#1a1a2e);margin-bottom:.35rem;letter-spacing:-.01em}
+.pf-section-sub{font-size:.85rem;color:var(--pf-text2,#666688);margin-bottom:2rem}
+.pf-repos-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:1rem}
+.pf-repo-card{background:var(--pf-card-bg,#f8f8fc);border:1px solid var(--pf-border,#e0e0f0);border-radius:12px;padding:1.25rem;text-decoration:none;color:inherit;display:flex;flex-direction:column;gap:.5rem;transition:border-color .2s,transform .15s,box-shadow .2s;position:relative;overflow:hidden}
+.pf-repo-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--pf-accent,#7c6dfa),var(--pf-accent2,#a855f7));opacity:0;transition:opacity .2s}
+.pf-repo-card:hover{border-color:var(--pf-accent,#7c6dfa);transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.08)}
+.pf-repo-card:hover::before{opacity:1}
+.pf-repo-name{font-family:'DM Mono',monospace;font-size:.85rem;font-weight:500;color:var(--pf-accent,#7c6dfa)}
+.pf-repo-desc{font-size:.82rem;color:var(--pf-text2,#666688);line-height:1.5;flex:1}
+.pf-repo-meta{display:flex;align-items:center;gap:.75rem;font-size:.75rem;color:var(--pf-text2,#888);margin-top:.25rem}
+.pf-repo-lang{display:flex;align-items:center;gap:.3rem}
+.pf-lang-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.pf-skills-wrap{display:flex;flex-wrap:wrap;gap:.5rem}
+.pf-skill-tag{padding:.35rem .9rem;border-radius:99px;font-size:.8rem;font-weight:500;border:1px solid}
+.pf-activity{display:flex;align-items:flex-end;gap:4px;height:60px;overflow:hidden}
+.pf-act-bar{flex:1;border-radius:3px 3px 0 0;min-height:4px;transition:background .2s}
+.pf-repos-table{width:100%;border-collapse:collapse;font-size:.85rem}
+.pf-repos-table th{text-align:left;padding:.6rem 1rem;font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--pf-text2,#888);border-bottom:1px solid var(--pf-border,#e0e0f0)}
+.pf-repos-table td{padding:.75rem 1rem;border-bottom:1px solid var(--pf-border,#f0f0f8);vertical-align:middle}
+.pf-repos-table tr:last-child td{border-bottom:none}
+.pf-repos-table tr:hover td{background:var(--pf-card-bg,#f8f8fc)}
+.pf-table-name{font-family:'DM Mono',monospace;color:var(--pf-accent,#7c6dfa);font-weight:500;text-decoration:none}
+.pf-table-name:hover{text-decoration:underline}
+.pf-footer{background:var(--pf-hero-bg,#0a0a1a);color:rgba(255,255,255,.5);padding:2rem 3rem;display:flex;align-items:center;justify-content:space-between;font-size:.8rem;flex-wrap:wrap;gap:1rem}
+.pf-footer-brand{font-family:'DM Mono',monospace;color:rgba(255,255,255,.7)}
+.theme-dark .pf-root{--pf-bg:#0d0d1a;--pf-text:#e8e8f8;--pf-text2:#8888bb;--pf-nav-bg:#111122;--pf-card-bg:#1a1a2e;--pf-border:#2a2a44;--pf-badge-bg:rgba(124,109,250,.12)}
+.theme-minimal .pf-root{--pf-hero-bg:#18181b;--pf-hero-text:#fff;--pf-accent:#22c55e;--pf-accent2:#16a34a;--pf-accent-glow:rgba(34,197,94,.15);--pf-badge-bg:rgba(34,197,94,.08)}
+.theme-ocean .pf-root{--pf-hero-bg:#0c1220;--pf-hero-text:#e0f0ff;--pf-accent:#0ea5e9;--pf-accent2:#6366f1;--pf-accent-glow:rgba(14,165,233,.2);--pf-badge-bg:rgba(14,165,233,.08)}
+.theme-rose .pf-root{--pf-hero-bg:#1c0a14;--pf-hero-text:#ffe4f0;--pf-accent:#f43f5e;--pf-accent2:#ec4899;--pf-accent-glow:rgba(244,63,94,.2);--pf-badge-bg:rgba(244,63,94,.08)}
+@media(max-width:600px){.pf-hero{padding:2rem 1.5rem}.pf-section{padding:2rem 1.5rem}.pf-repos-table th:nth-child(3),.pf-repos-table td:nth-child(3),.pf-repos-table th:nth-child(4),.pf-repos-table td:nth-child(4){display:none}}
+`;
+
+function exportHTML() {
+  const html = buildPortfolioHTML(true);
+  const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = (state.user.login || 'portfolio') + '-portfolio.html';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast('✓ Portfolio exported!', 'success');
+}
+
+// ─── UTILS ──────────────────────────────────────────────
+function goBack() {
+  if (!confirm('Start over? Your customizations will be lost.')) return;
+  state = { user: null, repos: [], featuredIds: new Set(), theme: 'default', sections: { featured: true, repos: true, skills: true, stats: true }, customColors: { accent: '#7c6dfa', hero: '#0a0a1a', bg: '#ffffff', text: '#1a1a2e' }, edits: { name:'',headline:'',bio:'',location:'',website:'',twitter:'' }, token: '', scale: 1 };
+  document.getElementById('gh-username').value = '';
+  document.getElementById('gh-token').value = '';
+  document.getElementById('login-error').classList.remove('show');
+  showScreen('login');
+}
+
+let toastTimer;
+function showToast(msg, type = '') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show ' + type;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+function toggleMobileSidebar() {
+  document.getElementById('sidebar').classList.toggle('hidden');
+}
+
+// Enter key on username field
+document.getElementById('gh-username').addEventListener('keydown', e => {
+  if (e.key === 'Enter') startGenerate();
+});
+
+// ─── PWA SERVICE WORKER ─────────────────────────────────
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js')
+      .then(() => console.log('[PWA] Service Worker registered'))
+      .catch(e => console.warn('[PWA] SW registration failed:', e));
+  });
+}
+</script>
+</body>
+</html>
